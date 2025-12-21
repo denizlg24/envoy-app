@@ -1,0 +1,19 @@
+'use client'
+import { useEffect, useState } from 'react'
+
+export default function Home() {
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch('/api/health')
+      const  json = await res.json()
+      setMessage(JSON.stringify(json))
+    }
+    fetchData()
+  }, [])
+
+  if (!message) return <p>Loading...</p>
+
+  return <p>{message}</p>
+}

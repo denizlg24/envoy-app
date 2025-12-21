@@ -1,6 +1,6 @@
+import { generateApiToken, hashApiToken } from "@/lib/crypto";
 import { requestDeviceCode, pollAccessToken, fetchGithubUser } from "@/lib/github";
 import { prisma } from "@/lib/prisma";
-import { generateApiToken,hashApiToken } from "../../../lib/crypto";
 
 
 export async function startGithubDeviceFlow() {

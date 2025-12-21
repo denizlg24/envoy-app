@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
-import { hashApiToken } from "../../lib/crypto";
 import { prisma } from "@/lib/prisma";
+import { hashApiToken } from "@/lib/crypto";
 
 
 

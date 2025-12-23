@@ -1,19 +1,15 @@
-'use client'
-import { useEffect, useState } from 'react'
+import { ApiStatusComponent } from "./_components/api-status-component";
+import { HeroSection } from "./_components/hero-section";
 
 export default function Home() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch('/api/health')
-      const  json = await res.json()
-      setMessage(JSON.stringify(json))
-    }
-    fetchData()
-  }, [])
-
-  if (!message) return <p>Loading...</p>
-
-  return <p>{message}</p>
+  return (
+    <main className="w-full">
+      <HeroSection />
+      <div className="flex justify-center px-4 pb-20">
+        <div className="w-full max-w-md">
+          <ApiStatusComponent />
+        </div>
+      </div>
+    </main>
+  );
 }

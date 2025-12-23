@@ -53,3 +53,19 @@ export async function fetchGithubUser(accessToken: string) {
   const json = await res.json();
   return GithubUserSchema.parse(json);
 }
+
+export async function fetchLatestRelease(owner: string, repo: string) {
+  const res = await fetch(`${GITHUB_API}/repos/${owner}/${repo}/releases/latest`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+    },
+    next: { revalidate: 3600 }
+  });
+
+  if (!res.ok) {
+    return null;
+  }
+
+  const json = await res.json();
+  return json.tag_name as string;
+}

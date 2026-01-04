@@ -16,10 +16,20 @@ export async function getUploadSignedUrl(
     throw new Error("Not authorized");
   }
 
+   const owner = await prisma.projectMember.findFirst({
+    where: { projectId, role: "owner" },
+    select: { userId: true },
+  });
+
+  if(!owner){
+    throw new Error("Project owner not found");
+  }
+
+
   const key =
     type === "manifest"
-      ? manifestKey(userId, projectId, hash)
-      : blobKey(userId, projectId, hash);
+      ? manifestKey(owner.userId, projectId, hash)
+      : blobKey(owner.userId, projectId, hash);
 
   return getUploadUrl(key);
 }
@@ -38,10 +48,19 @@ export async function getDownloadSignedUrl(
     throw new Error("Not authorized");
   }
 
+  const owner = await prisma.projectMember.findFirst({
+    where: { projectId, role: "owner" },
+    select: { userId: true },
+  });
+
+  if(!owner){
+    throw new Error("Project owner not found");
+  }
+
   const key =
     type === "manifest"
-      ? manifestKey(userId, projectId, hash)
-      : blobKey(userId, projectId, hash);
+      ? manifestKey(owner.userId, projectId, hash)
+      : blobKey(owner.userId, projectId, hash);
 
   return getDownloadUrl(key);
 }

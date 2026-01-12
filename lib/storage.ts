@@ -65,3 +65,11 @@ export function manifestKey(
 ) {
   return `${userId}/${projectId}/manifests/${hash}.enc`;
 }
+
+export function commitKey(
+  userId: string,
+  projectId: string,
+  hash: string
+) {
+  return `${userId}/${projectId}/commits/${hash}.enc`;
+}

@@ -15,6 +15,38 @@ export async function createProject(userId: string) {
   return project;
 }
 
+export async function getHead(projectId: string) {
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+  });
+  if (!project || !project.head_commit_hash) {
+    return null;
+  }
+  return project.head_commit_hash;
+}
+
+export async function updateHead({
+  projectId,
+  newHead,
+}: {
+  projectId: string;
+  newHead: string;
+}) {
+  const updatedProject = await prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      head_commit_hash: {
+        set: newHead,
+      },
+    },
+  });
+  return updatedProject.head_commit_hash || null;
+}
+
 export async function addMember({
   projectId,
   userId,
@@ -77,9 +109,9 @@ export async function listProjectMembers(projectId: string) {
 
 export async function deleteProjectMembers(projectId: string) {
   const deleted = await prisma.projectMember.deleteMany({
-    where: { 
+    where: {
       projectId,
-      role: { not: "owner" }
+      role: { not: "owner" },
     },
   });
   return deleted.count;

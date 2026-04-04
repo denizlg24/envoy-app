@@ -8,6 +8,7 @@ const envSchema = z.object({
   R2_ACCESS_KEY_ID: z.string(),
   R2_SECRET_ACCESS_KEY: z.string(),
   R2_BUCKET: z.string(),
+  CRON_SECRET: z.string().optional(),
 });
 
 const _env = envSchema.parse(process.env);

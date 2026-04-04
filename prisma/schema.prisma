@@ -45,3 +45,36 @@ model ApiToken {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model HealthCheck {
+  id           String   @id @default(uuid())
+  timestamp    DateTime @default(now())
+  
+  // Overall status
+  healthy      Boolean
+  responseTime Int?     // in milliseconds
+  
+  // Individual service status
+  dbHealthy       Boolean
+  dbResponseTime  Int?
+  r2Healthy       Boolean
+  r2ResponseTime  Int?
+  ghHealthy       Boolean
+  ghResponseTime  Int?
+
+  @@index([timestamp])
+}
+
+model ApiRequest {
+  id           String   @id @default(uuid())
+  timestamp    DateTime @default(now())
+  
+  method       String   // GET, POST, etc.
+  path         String   // /api/projects, etc.
+  statusCode   Int
+  responseTime Int      // in milliseconds
+  error        String?  // Error message if failed
+
+  @@index([timestamp])
+  @@index([path])
+}

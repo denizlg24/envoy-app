@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { performHealthCheck, type HealthCheckResult } from "@/lib/health";
-import { sanitizeApiPath } from "@/api/utils/sanitize-api-path";
+import { getApiProblemCategory } from "@/api/utils/api-problem-category";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
@@ -74,8 +74,8 @@ export async function getStatusStats() {
   // Build timeline with combined health + error data
   const timeline = buildTimeline(healthChecks, allRequests, ninetyDaysAgo, now);
 
-  // Group errors by endpoint for insights
-  const errorsByEndpoint = getErrorsByEndpoint(recentRequests);
+  // Group errors by broad problem category for insights
+  const errorsByCategory = getErrorsByCategory(recentRequests);
 
   return {
     // Current status
@@ -98,7 +98,7 @@ export async function getStatusStats() {
     timeline,
     
     // Error insights
-    errorsByEndpoint,
+    errorsByCategory,
     
     // Metadata
     lastCheck: latestHealth?.timestamp || null,
@@ -184,23 +184,25 @@ function getStatusForDay(stats: {
   return "down";
 }
 
-function getErrorsByEndpoint(requests: Array<{ path: string; statusCode: number; error: string | null }>) {
+function getErrorsByCategory(
+  requests: Array<{ method: string; path: string; statusCode: number; error: string | null }>
+) {
   const errorMap = new Map<string, { count: number; errors: string[] }>();
   
   for (const req of requests) {
     if (req.statusCode >= 400) {
-      const path = sanitizeApiPath(req.path);
-      const existing = errorMap.get(path) || { count: 0, errors: [] };
+      const category = getApiProblemCategory(req.path, req.method);
+      const existing = errorMap.get(category) || { count: 0, errors: [] };
       existing.count++;
       if (req.error && !existing.errors.includes(req.error)) {
         existing.errors.push(req.error);
       }
-      errorMap.set(path, existing);
+      errorMap.set(category, existing);
     }
   }
 
   return Array.from(errorMap.entries())
-    .map(([path, data]) => ({ path, ...data }))
+    .map(([category, data]) => ({ category, ...data }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 5); // Top 5 error endpoints
+    .slice(0, 5); // Top 5 problem categories
 }

@@ -1,13 +1,13 @@
 import type { MiddlewareHandler } from "hono";
 import { prisma } from "@/lib/prisma";
-import { sanitizeApiPath } from "@/api/utils/sanitize-api-path";
+import { getApiProblemCategory } from "@/api/utils/api-problem-category";
 
 // Paths to exclude from tracking (to avoid recursive logging)
 const EXCLUDED_PATHS = ["/api/status/cron", "/api/status/stats", "/api/health"];
 
 export const requestTracker: MiddlewareHandler = async (c, next) => {
   const path = new URL(c.req.url).pathname;
-  const trackedPath = sanitizeApiPath(path);
+  const trackedPath = getApiProblemCategory(path, c.req.method);
 
   // Skip tracking for status endpoints to avoid noise
   if (EXCLUDED_PATHS.some((p) => path.startsWith(p))) {

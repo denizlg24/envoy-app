@@ -30,8 +30,8 @@ interface StatusStats {
     requests: number;
     errorRate: number;
   }>;
-  errorsByEndpoint: Array<{
-    path: string;
+  errorsByCategory: Array<{
+    category: string;
     count: number;
     errors: string[];
   }>;
@@ -243,22 +243,22 @@ export const ApiStatusComponent = () => {
       </div>
 
       {/* Error Insights */}
-      {stats?.errorsByEndpoint && stats.errorsByEndpoint.length > 0 && (
+      {stats?.errorsByCategory && stats.errorsByCategory.length > 0 && (
         <div className="border-t border-border pt-6">
           <h3 className="font-mono text-xs font-medium text-muted-foreground tracking-wider uppercase mb-4">
             Recent Errors (24h)
           </h3>
           <div className="space-y-2">
-            {stats.errorsByEndpoint.map((endpoint) => (
+            {stats.errorsByCategory.map((problem) => (
               <div
-                key={endpoint.path}
+                key={problem.category}
                 className="flex items-center justify-between text-sm"
               >
-                <code className="text-muted-foreground font-mono text-xs bg-muted/50 px-2 py-0.5 rounded">
-                  {endpoint.path}
-                </code>
+                <span className="text-muted-foreground text-sm">
+                  {problem.category}
+                </span>
                 <span className="text-red-500 font-mono">
-                  {endpoint.count} error{endpoint.count !== 1 ? "s" : ""}
+                  {problem.count} error{problem.count !== 1 ? "s" : ""}
                 </span>
               </div>
             ))}

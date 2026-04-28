@@ -5,7 +5,21 @@ import {
   getUploadUrl,
   getDownloadUrl,
   commitKey,
+  objectExists,
 } from "@/lib/storage";
+
+function storageKey(
+  type: "blob" | "manifest" | "commit",
+  userId: string,
+  projectId: string,
+  hash: string
+) {
+  return type === "manifest"
+    ? manifestKey(userId, projectId, hash)
+    : type === "commit"
+    ? commitKey(userId, projectId, hash)
+    : blobKey(userId, projectId, hash);
+}
 
 export async function getUploadSignedUrl(
   userId: string,
@@ -30,12 +44,7 @@ export async function getUploadSignedUrl(
     throw new Error("Project owner not found");
   }
 
-  const key =
-    type === "manifest"
-      ? manifestKey(owner.userId, projectId, hash)
-      : type === "commit"
-      ? commitKey(owner.userId, projectId, hash)
-      : blobKey(owner.userId, projectId, hash);
+  const key = storageKey(type, owner.userId, projectId, hash);
 
   return getUploadUrl(key);
 }
@@ -63,12 +72,14 @@ export async function getDownloadSignedUrl(
     throw new Error("Project owner not found");
   }
 
+  const ownerKey = storageKey(type, owner.userId, projectId, hash);
+  const requesterKey = storageKey(type, userId, projectId, hash);
   const key =
-    type === "manifest"
-      ? manifestKey(owner.userId, projectId, hash)
-      : type === "commit"
-      ? commitKey(owner.userId, projectId, hash)
-      : blobKey(owner.userId, projectId, hash);
+    (await objectExists(ownerKey)) || owner.userId === userId
+      ? ownerKey
+      : (await objectExists(requesterKey))
+      ? requesterKey
+      : ownerKey;
 
   return getDownloadUrl(key);
 }

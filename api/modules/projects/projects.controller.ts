@@ -65,11 +65,14 @@ export async function updateProjectHead(c: Context) {
       403
     );
   }
-  const currentHead = await serviceGetHead(projectId);
-  if (currentHead != expected_head) {
-    return c.json({ error: "Expected head doesn't match current head." }, 400);
+  const head = await serviceUpdateHead({
+    projectId,
+    newHead: new_head,
+    expectedHead: expected_head ?? null,
+  });
+  if (!head) {
+    return c.json({ error: "Expected head doesn't match current head." }, 409);
   }
-  const head = await serviceUpdateHead({ projectId, newHead: new_head });
   return c.json({ head }, 200);
 }
 

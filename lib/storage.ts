@@ -1,4 +1,9 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "./env";
 
@@ -48,6 +53,21 @@ export async function getDownloadUrl(
     method: "GET",
     url,
   };
+}
+
+export async function objectExists(key: string) {
+  try {
+    await client.send(
+      new HeadObjectCommand({
+        Bucket: env.R2_BUCKET,
+        Key: key,
+      })
+    );
+
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function blobKey(

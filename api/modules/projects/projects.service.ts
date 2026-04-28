@@ -30,13 +30,17 @@ export async function getHead(projectId: string) {
 export async function updateHead({
   projectId,
   newHead,
+  expectedHead,
 }: {
   projectId: string;
   newHead: string;
+  expectedHead: string | null;
 }) {
-  const updatedProject = await prisma.project.update({
+  const currentHead = expectedHead ?? "";
+  const updatedProject = await prisma.project.updateMany({
     where: {
       id: projectId,
+      head_commit_hash: currentHead,
     },
     data: {
       head_commit_hash: {
@@ -44,7 +48,8 @@ export async function updateHead({
       },
     },
   });
-  return updatedProject.head_commit_hash || null;
+
+  return updatedProject.count === 1 ? newHead : null;
 }
 
 export async function addMember({

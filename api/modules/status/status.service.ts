@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { performHealthCheck, type HealthCheckResult } from "@/lib/health";
+import { sanitizeApiPath } from "@/api/utils/sanitize-api-path";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
@@ -188,12 +189,13 @@ function getErrorsByEndpoint(requests: Array<{ path: string; statusCode: number;
   
   for (const req of requests) {
     if (req.statusCode >= 400) {
-      const existing = errorMap.get(req.path) || { count: 0, errors: [] };
+      const path = sanitizeApiPath(req.path);
+      const existing = errorMap.get(path) || { count: 0, errors: [] };
       existing.count++;
       if (req.error && !existing.errors.includes(req.error)) {
         existing.errors.push(req.error);
       }
-      errorMap.set(req.path, existing);
+      errorMap.set(path, existing);
     }
   }
 

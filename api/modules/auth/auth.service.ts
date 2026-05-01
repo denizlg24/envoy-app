@@ -18,7 +18,9 @@ export async function completeGithubDeviceFlow(deviceCode: string) {
 
   const user = await prisma.user.upsert({
     where: { githubId: ghUser.id.toString() },
-    update: {},
+    update: {
+      email: ghUser.email,
+    },
     create: {
       githubId: ghUser.id.toString(),
       email: ghUser.email,

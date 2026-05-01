@@ -104,14 +104,12 @@ export async function addMember(c: Context) {
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { githubId: githubId },
+  const user = await prisma.user.upsert({
+    where: { githubId },
+    update: {},
+    create: { githubId },
     select: { id: true },
   });
-
-  if (!user) {
-    return c.json({ error: "User not found" }, 404);
-  }
 
   const result = await serviceAddMember({
     projectId,

@@ -74,12 +74,29 @@ export async function getDownloadSignedUrl(
 
   const ownerKey = storageKey(type, owner.userId, projectId, hash);
   const requesterKey = storageKey(type, userId, projectId, hash);
-  const key =
-    (await objectExists(ownerKey)) || owner.userId === userId
-      ? ownerKey
-      : (await objectExists(requesterKey))
-      ? requesterKey
-      : ownerKey;
+  if ((await objectExists(ownerKey)) || owner.userId === userId) {
+    return getDownloadUrl(ownerKey);
+  }
 
-  return getDownloadUrl(key);
+  if (await objectExists(requesterKey)) {
+    return getDownloadUrl(requesterKey);
+  }
+
+  const members = await prisma.projectMember.findMany({
+    where: { projectId },
+    select: { userId: true },
+  });
+
+  for (const member of members) {
+    if (member.userId === owner.userId || member.userId === userId) {
+      continue;
+    }
+
+    const memberKey = storageKey(type, member.userId, projectId, hash);
+    if (await objectExists(memberKey)) {
+      return getDownloadUrl(memberKey);
+    }
+  }
+
+  return getDownloadUrl(ownerKey);
 }

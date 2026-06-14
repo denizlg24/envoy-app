@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { performHealthCheck, type HealthCheckResult } from "@/lib/health";
 import { getApiProblemCategory } from "@/api/utils/api-problem-category";
+import { isServerError, isHealthyForStatus } from "@/api/utils/request-severity";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
@@ -60,8 +61,9 @@ export async function getStatusStats() {
     ? (healthChecks.filter((c) => c.healthy).length / healthChecks.length) * 100
     : null;
 
-  // Calculate 24h error rate
-  const errorCount = recentRequests.filter((r) => r.statusCode >= 400).length;
+  // Calculate 24h server error rate. Client errors (4xx, e.g. unauthorized
+  // access) mean the API behaved correctly and never count as service errors.
+  const errorCount = recentRequests.filter((r) => isServerError(r.statusCode)).length;
   const errorRate = recentRequests.length > 0
     ? (errorCount / recentRequests.length) * 100
     : null;
@@ -140,7 +142,7 @@ function buildTimeline(
     const day = dayMap.get(key);
     if (day) {
       day.totalRequests++;
-      if (req.statusCode < 400) day.successRequests++;
+      if (isHealthyForStatus(req.statusCode)) day.successRequests++;
     }
   }
 
@@ -190,7 +192,7 @@ function getErrorsByCategory(
   const errorMap = new Map<string, { count: number; errors: string[] }>();
   
   for (const req of requests) {
-    if (req.statusCode >= 400) {
+    if (isServerError(req.statusCode)) {
       const category = getApiProblemCategory(req.path, req.method);
       const existing = errorMap.get(category) || { count: 0, errors: [] };
       existing.count++;

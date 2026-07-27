@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { authMiddleware } from "../../middleware/auth.middleware";
-import { downloadBlob, uploadBlob } from "./blobs.controller";
+import { downloadBlob, setBlobAccess, uploadBlob } from "./blobs.controller";
 export const blobRoutes = new Hono();
 
 blobRoutes.use("*", authMiddleware);
@@ -13,4 +13,9 @@ blobRoutes.post(
 blobRoutes.get(
   "/projects/:projectId/blobs/:hash/download",
   downloadBlob
+);
+
+blobRoutes.put(
+  "/projects/:projectId/blobs/:hash/access",
+  setBlobAccess
 );

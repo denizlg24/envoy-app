@@ -21,17 +21,17 @@ const steps: Step[] = [
   },
   {
     number: 2,
-    title: "Encrypt and commit your .env",
+    title: "Stage and commit your .env",
     description:
-      "Add your .env file to tracking with envy encrypt, then commit the changes. Files are encrypted client-side using XChaCha20-Poly1305 before being stored. Each file can have its own passphrase for granular access control.",
-    command: "envy encrypt && envy commit -m \"Initial secrets\"",
+      "Stage your .env with envy add, inspect its redacted diff, then commit. Envoy derives an independent encryption key for each file from your one project passphrase.",
+    command: "envy add .env && envy diff --cached && envy commit -m \"Initial secrets\"",
     gif: "/demos/encrypt_demo.gif",
   },
   {
     number: 3,
     title: "Pull on any machine",
     description:
-      "Clone your repo on another machine and run envy pull. Enter your passphrase to decrypt and restore your environment files. Team members with access can pull using their own passphrase — no plaintext ever touches the wire.",
+      "Clone your repo on another machine and run envy pull. One project passphrase restores every managed file the member can download; owners can grant access per file, and plaintext never touches the wire.",
     command: "envy pull",
     gif: "/demos/pull_demo.gif",
   },

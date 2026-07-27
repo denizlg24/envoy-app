@@ -35,6 +35,10 @@ const API_PROBLEM_CATEGORIES = [
     label: "Problems downloading blobs",
   },
   {
+    pattern: /^\/api\/projects\/[^/]+\/blobs\/[^/]+\/access\/?$/,
+    label: "Problems managing file access",
+  },
+  {
     pattern: /^\/api\/health\/?$/,
     label: "API health check problems",
   },
